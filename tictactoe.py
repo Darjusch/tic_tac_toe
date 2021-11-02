@@ -70,6 +70,7 @@ def result(board, action: tuple):
     board_copy = copy.deepcopy(board)
     move = player(board_copy)
     board_copy[action[0]][action[1]] = move
+    return board_copy
 
 def winner(board):
     """
@@ -80,7 +81,10 @@ def winner(board):
     # One can win the game with three of their moves in a row horizontally, vertically, or diagonally.
     # You may assume that there will be at most one winner (that is, no board will ever have both players with three-in-a-row, since that would be an invalid board state).
     # If there is no winner of the game (either because the game is in progress, or because it ended in a tie), the function should return None.
-    raise NotImplementedError
+    
+    #TODO Check for winner -> Return Winner
+    #TODO check for draw -> Return None
+    #TODO Else its in progress -> Return None
 
 
 def terminal(board):
