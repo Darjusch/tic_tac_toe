@@ -2,7 +2,8 @@
 Tic Tac Toe Player
 """
 
-import math, copy
+import math, copy, util
+from util import Node, StackFrontier
 
 X = "X"
 O = "O"
@@ -48,10 +49,10 @@ def actions(board):
     # Any return value is acceptable if a terminal board is provided as input.
    
     possible_moves = set()
-    for i in board:
-        for j in i:
+    for count_i, i in enumerate(board):
+        for count_j, j in enumerate(i):
             if EMPTY == j:
-                possible_moves.add(i,j)
+                possible_moves.add((count_i, count_j))
     return possible_moves
 
 def result(board, action: tuple):
@@ -82,20 +83,45 @@ def winner(board):
     # You may assume that there will be at most one winner (that is, no board will ever have both players with three-in-a-row, since that would be an invalid board state).
     # If there is no winner of the game (either because the game is in progress, or because it ended in a tie), the function should return None.
     
-    #TODO Check for winner -> Return Winner
-    #TODO check for draw -> Return None
-    #TODO Else its in progress -> Return None
+    win_conditions = [
+        [X, X ,X], 
+        [O, O, O]
+        ]
+    diagonal_win = [
+        [board[0][0], board[1][1], board[2][2]],
+        [board[0][2], board[1][1], board[2][0]]
+         ]
+    # 3 in a row
+    for item in board:
+        if item in win_conditions:
+            return item[0]
+    # 3 in a column
+    for item in zip(board[0], board[1], board[2]):
+        if list(item) in win_conditions:
+            return item[0]
+    # 3 diagonal
+    for win in diagonal_win:
+        if win in win_conditions:
+            return win[0]
+    return None
 
 
 def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    # The terminal function should accept a board as input, and return a boolean value indicating whether the game is over.
-    # If the game is over, either because someone has won the game or because all cells have been filled without anyone winning, the function should return True.
-    # Otherwise, the function should return False if the game is still in progress.
-    raise NotImplementedError
-
+    winner_determined = winner(board)
+    # Winner
+    if winner_determined:
+        return True
+    # There are still moves
+    for i in board:
+        for j in i:
+            if EMPTY == j:
+                print(j)
+                return False
+    # Draw OR no moves
+    return True
 
 def utility(board):
     """
@@ -104,8 +130,14 @@ def utility(board):
     # The utility function should accept a terminal board as input and output the utility of the board.
     # If X has won the game, the utility is 1. If O has won the game, the utility is -1. If the game has ended in a tie, the utility is 0.
     # You may assume utility will only be called on a board if terminal(board) is True.
-    raise NotImplementedError
-
+    
+    utility_winner = winner(board)
+    if utility_winner == X:
+        return 1
+    elif utility_winner == O:
+        return -1
+    else:
+        return 0
 
 def minimax(board):
     """
@@ -114,7 +146,64 @@ def minimax(board):
     # The minimax function should take a board as input, and return the optimal move for the player to move on that board.
     # The move returned should be the optimal action (i, j) that is one of the allowable actions on the board. If multiple moves are equally optimal, any of those moves is acceptable.
     # If the board is a terminal board, the minimax function should return None.
-    raise NotImplementedError
+    
+    # Store the actions as nodes in a Stack
+    # DFS
+    # Go one "branch of the tree" down and check if the game is over or winning
+    # till the end
+    # If it is winning or over check if that is the best result already 
+    # If we check for player X we want X to win and can stop here
+    # Same for player O
+    # If that is not the case we need to somehow save it so we can later on check if that was move better than other 
+    # For example draw is worse then winning but still better than losing
+    # Maybe for now we can drop that saving and add it later even though we should not be losing when we play perfect
+    # If the games is not over
+    # Copy the board again and create new moves with the result function
+    # Save that in the Stack and continue.
+    stack = StackFrontier()
+    current_player = player(board)
+    possible_actions = actions(board)
+    node = Node(state=board, parent=None, action=list(possible_actions))
+    stack.add(node)
+    for current_action in possible_actions:
+        board_after_move = result(board, current_action)
+        actions_after_move = actions(board_after_move)
+        node = Node(state=board_after_move, parent=board, action=list(actions_after_move))
+        stack.add(node)    
+    while len(stack.frontier) > 0:
+        for node in stack.frontier:
+            for action in node.action:
+                board_after_move = result(board, action)
+                # Check for win
+                if terminal(board_after_move):
+                    #check if winner
+                    if winner(board_after_move):
+                        print("WINNER")
+                        # Return the optimal move
+                        return "WINNER"
+                    else:
+                        # Return the optimal move
+                        return "DRAW"
+                actions_after_move = actions(board_after_move)
+                if len(stack.frontier) == 0:
+                    break
+                removed_node = stack.remove()
+                new_node = Node(state=board_after_move, parent=removed_node.state, action=list(actions_after_move))
+                stack.add(new_node)
+                print("Node removed")
+        print("Again")
+
+        
+
+
 
 board = initial_state()
-player(board)
+# player(board)
+# w = winner([[X, EMPTY, O],
+#             [O, X, EMPTY],
+#             [O, EMPTY, X]])
+# print(w)
+m = minimax([[X, O, EMPTY],
+             [O, EMPTY, X],
+             [O, X, X]])
+print(m)
