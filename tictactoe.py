@@ -117,29 +117,12 @@ def minimax(board):
     """
     stack = StackFrontier()
     possible_actions = actions(board)
-    for current_action in possible_actions:
-        if len(stack.frontier) == 0:
-            node = Node(
-                state=board,
-                parent=None, 
-                action=list(possible_actions), 
-                root_action=current_action)
-            stack.add(node)
-        board_after_move = result(board, current_action)
-        if terminal(board_after_move):
-            if winner(board_after_move):
-                return node.root_action
-            else:
-                return node.root_action
-        actions_after_move = actions(board_after_move)
-        if len(stack.frontier) == 0:
-            break
-        removed_node = stack.remove()
-        new_node = Node(
-            state=board_after_move, 
-            parent=removed_node.state, 
-            action=list(actions_after_move), root_action=current_action)
-        stack.add(new_node) 
+    node = Node(
+        state=board,
+        parent=None, 
+        action=list(possible_actions), 
+        root_action=list(possible_actions)[0])
+    stack.add(node)
     while len(stack.frontier) > 0:
         for node in stack.frontier:
             for action in node.action:
