@@ -1,9 +1,9 @@
 class Node:
-    def __init__(self, state, action, parent, root_action):
+    def __init__(self, state, action, parent, score):
         self.state = state
         self.action = action
         self.parent = parent
-        self.root_action = root_action
+        self.score = score
 
 class StackFrontier():
     def __init__(self):

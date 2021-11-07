@@ -11,141 +11,190 @@ EMPTY = None
 
 
 def initial_state():
-    """
-    Returns starting state of the board.
-    """
-    return [[EMPTY, EMPTY, EMPTY],
-            [EMPTY, EMPTY, EMPTY],
-            [EMPTY, EMPTY, EMPTY]]
+	"""
+	Returns starting state of the board.
+	"""
+	return [[EMPTY, EMPTY, EMPTY],
+			[EMPTY, EMPTY, EMPTY],
+			[EMPTY, EMPTY, EMPTY]]
 
 def player(board):
-    """
-    Returns player who has the next turn on a board.
-    """
-    x_count = 0
-    o_count = 0
-    for i in board:
-        for j in i:
-            if X == j:
-                x_count += 1
-            elif O == j:
-                o_count += 1
-    if x_count > o_count:
-        return O
-    else:
-        return X
+	"""
+	Returns player who has the next turn on a board.
+	"""
+	x_count = 0
+	o_count = 0
+	for i in board:
+		for j in i:
+			if X == j:
+				x_count += 1
+			elif O == j:
+				o_count += 1
+	if x_count > o_count:
+		return O
+	else:
+		return X
 
 def actions(board):
-    """
-    Returns set of all possible actions (i, j) available on the board.
-    """
+	"""
+	Returns set of all possible actions (i, j) available on the board.
+	"""
 
-    possible_moves = []
-    for count_i, i in enumerate(board):
-        for count_j, j in enumerate(i):
-            if EMPTY == j:
-                possible_moves.append((count_i, count_j))
-    return possible_moves
+	possible_moves = []
+	for count_i, i in enumerate(board):
+		for count_j, j in enumerate(i):
+			if EMPTY == j:
+				possible_moves.append((count_i, count_j))
+	return possible_moves
 
 def result(board, action: tuple):
-    """
-    Returns the board that results from making move (i, j) on the board.
-    """
-    board_copy = copy.deepcopy(board)
-    move = player(board_copy)
-    board_copy[action[0]][action[1]] = move
-    return board_copy
+	"""
+	Returns the board that results from making move (i, j) on the board.
+	"""
+	board_copy = copy.deepcopy(board)
+	move = player(board_copy)
+	try:
+		board_copy[action[0]][action[1]] = move
+		return board_copy
+	except: 
+		raise ValueError
 
 def winner(board):
-    """
-    Returns the winner of the game, if there is one.
-    """
-    win_conditions = [
-        [X, X ,X], 
-        [O, O, O]
-        ]
-    diagonal_win = [
-        [board[0][0], board[1][1], board[2][2]],
-        [board[0][2], board[1][1], board[2][0]]
-         ]
-    # 3 in a row
-    for item in board:
-        if item in win_conditions:
-            return item[0]
-    # 3 in a column
-    for item in zip(board[0], board[1], board[2]):
-        if list(item) in win_conditions:
-            return item[0]
-    # 3 diagonal
-    for win in diagonal_win:
-        if win in win_conditions:
-            return win[0]
-    return None
+	"""
+	Returns the winner of the game, if there is one.
+	"""
+	win_conditions = [
+		[X, X ,X], 
+		[O, O, O]
+		]
+	diagonal_win = [
+		[board[0][0], board[1][1], board[2][2]],
+		[board[0][2], board[1][1], board[2][0]]
+		 ]
+	# 3 in a row
+	for item in board:
+		if item in win_conditions:
+			return item[0]
+	# 3 in a column
+	for item in zip(board[0], board[1], board[2]):
+		if list(item) in win_conditions:
+			return item[0]
+	# 3 diagonal
+	for win in diagonal_win:
+		if win in win_conditions:
+			return win[0]
+	return None
 
 
 def terminal(board):
-    """
-    Returns True if game is over, False otherwise.
-    """
-    winner_determined = winner(board)
-    # Winner
-    if winner_determined:
-        return True
-    # There are still moves
-    for i in board:
-        for j in i:
-            if EMPTY == j:
-                return False
-    # Draw OR no moves
-    return True
+	"""
+	Returns True if game is over, False otherwise.
+	"""
+	winner_determined = winner(board)
+	# Winner
+	if winner_determined:
+		return True
+	# There are still moves
+	for i in board:
+		for j in i:
+			if EMPTY == j:
+				return False
+	# Draw OR no moves
+	return True
 
 def utility(board):
-    """
-    Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
-    """  
-    utility_winner = winner(board)
-    if utility_winner == X:
-        return 1
-    elif utility_winner == O:
-        return -1
-    else:
-        return 0
+	"""
+	Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
+	"""  
+	utility_winner = winner(board)
+	if utility_winner == X:
+		return 1
+	elif utility_winner == O:
+		return -1
+	else:
+		return 0
 
 def minimax(board):
-    """
-    Returns the optimal action for the current player on the board.
-    """
-    stack = StackFrontier()
-    possible_actions = actions(board)
-    node = Node(
-        state=board,
-        parent=None, 
-        action=list(possible_actions), 
-        root_action=list(possible_actions)[0])
-    stack.add(node)
-    while len(stack.frontier) > 0:
-        for node in stack.frontier:
-            for action in node.action:
-                board_after_move = result(node.state, action)
-                if terminal(board_after_move):
-                    if winner(board_after_move):
-                        return node.root_action
-                    else:
-                        return node.root_action
-                actions_after_move = actions(board_after_move)
-                if len(stack.frontier) == 0:
-                    break
-                removed_node = stack.remove()
-                new_node = Node(
-                    state=board_after_move, 
-                    parent=removed_node.state, 
-                    action=list(actions_after_move), 
-                    root_action=removed_node.root_action
-                    )
-                stack.add(new_node)
-    print("Okay")
+	"""
+	Returns the optimal action for the current player on the board.
+	"""
+
+
+	# Initializing
+	stack = StackFrontier()
+	node = Node(
+		state=board,
+		parent=None, 
+		action=None,
+		score=None)
+	stack.add(node)
+
+	current_player = player(board)
+	game_not_over = True
+	while game_not_over:
+		for node in stack.frontier:
+				# create new possible actions
+				possible_actions = actions(node.state)
+				if not possible_actions:
+					game_not_over = False
+				for action in possible_actions:
+					# copy and get board after action
+					board = result(node.state, action)
+					score = None
+					# check if game is over
+					if terminal(board):
+						# return score of move
+						score = utility(board)
+					new_node = Node(
+						state=board, 
+						parent=node,
+						action=action, 
+						score=score
+						)
+					stack.add(new_node)
+					if score:
+						break
+
+	# then i want to see which of them has the highest score
+	# this we can check by there children when one of them has -1 its over
+	# and then we pick the highest and we are done
+
+	terminal_nodes = list(filter(lambda x: x.score , stack.frontier))
+	highest_node = None
+	higher = True
+	list_of_root_nodes = []
+	for y in terminal_nodes:
+		try:
+			print(y.score)
+			print(y.state)
+			print(y.action)
+		except:
+			print("root")
+		while higher:
+			try:
+				# not working because not all notes have scores
+				# so we have to filter first by the ones that have scores
+				# and only loop through them and then assign the parent
+				y.parent.score = y.score
+				highest_node = y.parent
+				print(highest_node)
+				y.parent = highest_node.parent
+			except:
+				higher = False
+		list_of_root_nodes.append(highest_node)
+		# return x.action
+	print(list_of_root_nodes)
+
+	# print(nodes_of_current_player)
+	print("Okay")
+
+
+
 b = initial_state()
-m = minimax(b)
+board = [[O, X, EMPTY],
+		[EMPTY, EMPTY, X],
+		[O, EMPTY, EMPTY]]
+m = minimax(board)
 print(m)
 
 ### Pytest doesn't work right now so improvising
