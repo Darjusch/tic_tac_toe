@@ -39,7 +39,8 @@ def actions(board):
 	"""
 	Returns set of all possible actions (i, j) available on the board.
 	"""
-
+	if terminal(board):
+		return []
 	possible_moves = []
 	for count_i, i in enumerate(board):
 		for count_j, j in enumerate(i):
@@ -114,206 +115,186 @@ def utility(board):
 	else:
 		return 0
 
+
 def minimax(board):
 	"""
 	Returns the optimal action for the current player on the board.
 	"""
+	if terminal(board):
+		return None
+	else:
+		# Check which turn it is 
+		best = None
+		worst = None
+		if player(board) == X:
+			value, move = max_value(board)
+			return move
+		elif player(board) == O:
+			value, move = min_value(board)
+			return move
+"""
+for each action 
+do the action then do the action for the other player 
+until the game is over 
+if the game is over check the score
+if the score is winning
+return 
+else continue
+"""
+def max_value(board):
+	if terminal(board):
+		return utility(board), None
+
+	value = float('-inf')
+	move = None
+
+	for action in actions(board):
+		score, act = min_value(result(board, action))
+		if score > value:
+			value = score
+			move = action
+			if value == 1:				
+				return value, move
+	return value, move
 
 
-	# Initializing
-	stack = StackFrontier()
-	node = Node(
-		state=board,
-		parent=None, 
-		action=None,
-		score=None)
-	stack.add(node)
+def min_value(board):
+	if terminal(board):
+		return utility(board), None
 
-	current_player = player(board)
-	game_not_over = True
-	while game_not_over:
-		for node in stack.frontier:
-				# create new possible actions
-				possible_actions = actions(node.state)
-				if not possible_actions:
-					game_not_over = False
-				for action in possible_actions:
-					# copy and get board after action
-					board = result(node.state, action)
-					score = None
-					# check if game is over
-					if terminal(board):
-						# return score of move
-						score = utility(board)
-					new_node = Node(
-						state=board, 
-						parent=node,
-						action=action, 
-						score=score
-						)
-					stack.add(new_node)
-					if score:
-						break
+	value = float('inf')
+	move = None
+	for action in actions(board):
+		score, act = max_value(result(board, action))
+		if score < value:
+			value = score
+			move = action
+			if value == -1:
+				return value, move
 
-	# then i want to see which of them has the highest score
-	# this we can check by there children when one of them has -1 its over
-	# and then we pick the highest and we are done
-
-	terminal_nodes = list(filter(lambda x: x.score , stack.frontier))
-	highest_node = None
-	higher = True
-	list_of_root_nodes = []
-	for y in terminal_nodes:
-		try:
-			print(y.score)
-			print(y.state)
-			print(y.action)
-		except:
-			print("root")
-		while higher:
-			try:
-				# not working because not all notes have scores
-				# so we have to filter first by the ones that have scores
-				# and only loop through them and then assign the parent
-				y.parent.score = y.score
-				highest_node = y.parent
-				print(highest_node)
-				y.parent = highest_node.parent
-			except:
-				higher = False
-		list_of_root_nodes.append(highest_node)
-		# return x.action
-	print(list_of_root_nodes)
-
-	# print(nodes_of_current_player)
-	print("Okay")
+	return value, move
 
 
-
-b = initial_state()
-board = [[O, X, EMPTY],
-		[EMPTY, EMPTY, X],
-		[O, EMPTY, EMPTY]]
-m = minimax(board)
-print(m)
+i = initial_state()
+minimax(i)
 
 ### Pytest doesn't work right now so improvising
 
-# def test_correct_player_X():
-#     board = initial_state()
-#     if player(board) == X:
-#         return True
-#     else:
-#         return False
-# print(f"test_correct_player_X: {test_correct_player_X()}")
+def test_correct_player_X():
+    board = initial_state()
+    if player(board) == X:
+        return True
+    else:
+        return False
+print(f"test_correct_player_X: {test_correct_player_X()}")
 
-# def test_correct_player_O():
-#     board = [[EMPTY, X, EMPTY],
-#             [EMPTY, EMPTY, EMPTY],
-#             [EMPTY, EMPTY, EMPTY]]
-#     if player(board) == O:
-#         return True
-#     else:
-#         return False
-# print(f"test_correct_player_O: {test_correct_player_O()}")
+def test_correct_player_O():
+    board = [[EMPTY, X, EMPTY],
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY]]
+    if player(board) == O:
+        return True
+    else:
+        return False
+print(f"test_correct_player_O: {test_correct_player_O()}")
 
-# def test_possible_actions():
-#     board = [[EMPTY, X, EMPTY],
-#             [X, O, X],
-#             [O, O, X]]
-#     possible_moves = [(0, 0), (0, 2)]
-#     if actions(board) == possible_moves:
-#         return True
-#     else:
-#         return False
-# print(f"test_possible_actions: {test_possible_actions()}")
+def test_possible_actions():
+    board = [[EMPTY, X, EMPTY],
+            [X, O, X],
+            [O, O, X]]
+    possible_moves = [(0, 0), (0, 2)]
+    if actions(board) == possible_moves:
+        return True
+    else:
+        return False
+print(f"test_possible_actions: {test_possible_actions()}")
 
-# def test_other_possible_actions():
-#     board = [[EMPTY, X, EMPTY],
-#             [X, EMPTY, X],
-#             [O, O, EMPTY]]
-#     possible_moves = [(0, 0), (0, 2), (1, 1), (2, 2)]
-#     if actions(board) == possible_moves:
-#         return True
-#     else:
-#         return False
-# print(f"test_other_possible_actions: {test_other_possible_actions()}")
+def test_other_possible_actions():
+    board = [[EMPTY, X, EMPTY],
+            [X, EMPTY, X],
+            [O, O, EMPTY]]
+    possible_moves = [(0, 0), (0, 2), (1, 1), (2, 2)]
+    if actions(board) == possible_moves:
+        return True
+    else:
+        return False
+print(f"test_other_possible_actions: {test_other_possible_actions()}")
 
-# def test_result_after_move():
-#     board = initial_state()
-#     if result(board, (0, 0)) == [
-#         [X, EMPTY, EMPTY],
-#         [EMPTY, EMPTY, EMPTY],
-#         [EMPTY, EMPTY, EMPTY]]:
-#         return True
-#     else:
-#         False
-# print(f"test_result_after_move: {test_result_after_move()}")
+def test_result_after_move():
+    board = initial_state()
+    if result(board, (0, 0)) == [
+        [X, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY]]:
+        return True
+    else:
+        False
+print(f"test_result_after_move: {test_result_after_move()}")
 
 
-# def test_result_after_multiple_moves():
-#     board = initial_state()
-#     board_after_move = result(board, (0, 0))
-#     board_after_move = result(board_after_move, (0, 1))
-#     board_after_move = result(board_after_move, (1, 1))
-#     board_after_move = result(board_after_move, (2, 1))
-#     if board_after_move == [
-#         [X, O, EMPTY],
-#         [EMPTY, X, EMPTY],
-#         [EMPTY, O, EMPTY]]:
-#         return True
-#     else:
-#         return False
-# print(f"test_result_after_multiple_moves {test_result_after_multiple_moves()}")
+def test_result_after_multiple_moves():
+    board = initial_state()
+    board_after_move = result(board, (0, 0))
+    board_after_move = result(board_after_move, (0, 1))
+    board_after_move = result(board_after_move, (1, 1))
+    board_after_move = result(board_after_move, (2, 1))
+    if board_after_move == [
+        [X, O, EMPTY],
+        [EMPTY, X, EMPTY],
+        [EMPTY, O, EMPTY]]:
+        return True
+    else:
+        return False
+print(f"test_result_after_multiple_moves {test_result_after_multiple_moves()}")
 
-# def test_winner_diagonal_x():
-#     board =  [
-#         [X, O, EMPTY],
-#         [EMPTY, X, EMPTY],
-#         [EMPTY, O, X]]
-#     if winner(board) == X:
-#         return True
-#     else:
-#         return False
-# print(test_winner_diagonal_x())
+def test_winner_diagonal_x():
+    board =  [
+        [X, O, EMPTY],
+        [EMPTY, X, EMPTY],
+        [EMPTY, O, X]]
+    if winner(board) == X:
+        return True
+    else:
+        return False
+print(test_winner_diagonal_x())
 
-# def test_winner_row_o():
-#     board =  [
-#         [O, O, O],
-#         [X, X, EMPTY],
-#         [X, EMPTY, X]]
-#     if winner(board) == O:
-#         return True
-#     else:
-#         return False
-# print(f"test_winner_row_o: {test_winner_row_o()}")
+def test_winner_row_o():
+    board =  [
+        [O, O, O],
+        [X, X, EMPTY],
+        [X, EMPTY, X]]
+    if winner(board) == O:
+        return True
+    else:
+        return False
+print(f"test_winner_row_o: {test_winner_row_o()}")
 
-# def test_winner_column_x():
-#     board =  [
-#         [X, O, O],
-#         [X, EMPTY, EMPTY],
-#         [X, EMPTY, X]]
-#     if winner(board) == X:
-#         return True
-#     else:
-#         return False
-# print(f"test_winner_column_x: {test_winner_column_x()}")
+def test_winner_column_x():
+    board =  [
+        [X, O, O],
+        [X, EMPTY, EMPTY],
+        [X, EMPTY, X]]
+    if winner(board) == X:
+        return True
+    else:
+        return False
+print(f"test_winner_column_x: {test_winner_column_x()}")
 
-# def test_draw():
-#     board =  [
-#         [O, X, O],
-#         [X, X, O],
-#         [X, O, X]]
-#     if winner(board) == None:
-#         return True
-#     else:
-#         return False
-# print(test_draw())
+def test_draw():
+    board =  [
+        [O, X, O],
+        [X, X, O],
+        [X, O, X]]
+    if winner(board) == None:
+        return True
+    else:
+        return False
+print(test_draw())
 
-# def test_game_ongoing():
-#     board = initial_state()
-#     if winner(board) == None:
-#         return True
-#     else:
-#         return False
-# print(test_game_ongoing())
+def test_game_ongoing():
+    board = initial_state()
+    if winner(board) == None:
+        return True
+    else:
+        return False
+print(test_game_ongoing())
