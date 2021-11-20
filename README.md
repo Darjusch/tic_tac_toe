@@ -1,10 +1,8 @@
 # tic_tac_toe
 
-To run:
-
 Clone the repository
 
-Run:
+Then run:
 
 pip3 install -r requirments.txt
 
